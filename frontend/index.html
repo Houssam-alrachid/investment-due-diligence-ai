@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Due Diligence AI</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>💼 Investment Due Diligence AI</h1>
+            <p class="subtitle">Professional-Grade Investment Analysis Powered by AI Agents</p>
+        </header>
+
+        <!-- Input Section -->
+        <section class="input-section">
+            <div class="input-grid">
+                <div class="input-column">
+                    <div class="form-group">
+                        <label for="companyName">🏢 Company Name</label>
+                        <input 
+                            type="text" 
+                            id="companyName" 
+                            placeholder="e.g., Anthropic, OpenAI, Stripe"
+                            class="input-field"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="investmentContext">💡 Investment Context (Optional)</label>
+                        <textarea 
+                            id="investmentContext" 
+                            rows="4"
+                            placeholder="e.g., Considering $500M Series D investment. Evaluating AI safety positioning..."
+                            class="input-field"
+                        ></textarea>
+                    </div>
+
+                    <button id="analyzeBtn" class="btn-primary">
+                        🚀 Run Due Diligence
+                    </button>
+                </div>
+
+                <div class="info-column">
+                    <div class="info-box">
+                        <h3>📈 What You'll Get:</h3>
+                        <ul>
+                            <li><strong>Investment Recommendation</strong> (Strong Buy → Strong Pass)</li>
+                            <li><strong>Risk Assessment</strong> (1-10 scale)</li>
+                            <li><strong>Financial Analysis</strong></li>
+                            <li><strong>Competitive Positioning</strong></li>
+                            <li><strong>Red Flags & Concerns</strong></li>
+                            <li><strong>Detailed Investment Memo</strong></li>
+                            <li><strong>Next Steps & Actions</strong></li>
+                        </ul>
+                        
+                        <h3>⏱️ Typical Analysis Time:</h3>
+                        <p>10-15 minutes for comprehensive research</p>
+                        
+                        <h3>💰 Cost:</h3>
+                        <p>~$5-10 in API costs per analysis</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Progress Section -->
+        <section id="progressSection" class="progress-section hidden">
+            <h2>📊 Analysis Progress</h2>
+            <div class="progress-bar-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <p id="progressStatus" class="progress-status">Initializing...</p>
+            <div id="progressLog" class="progress-log"></div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="results-section hidden">
+            <div class="tabs">
+                <button class="tab-button active" data-tab="summary">📋 Executive Summary</button>
+                <button class="tab-button" data-tab="findings">🔍 Key Findings</button>
+                <button class="tab-button" data-tab="thesis">💡 Investment Thesis</button>
+                <button class="tab-button" data-tab="steps">✅ Next Steps</button>
+                <button class="tab-button" data-tab="report">📄 Full Report</button>
+            </div>
+
+            <div class="tab-content">
+                <div id="summary" class="tab-panel active"></div>
+                <div id="findings" class="tab-panel"></div>
+                <div id="thesis" class="tab-panel"></div>
+                <div id="steps" class="tab-panel"></div>
+                <div id="report" class="tab-panel"></div>
+            </div>
+        </section>
+
+        <!-- Examples Section -->
+        <section class="examples-section">
+            <h2>💡 Example Analyses</h2>
+            <div class="examples-grid">
+                <div class="example-card" data-company="Anthropic" data-context="Evaluating $500M Series D. Focus on AI safety moat and competitive position vs OpenAI.">
+                    <h3>Anthropic</h3>
+                    <p>Series D evaluation - AI safety focus</p>
+                </div>
+                <div class="example-card" data-company="Stripe" data-context="Potential late-stage investment. Assess fintech market position and growth trajectory.">
+                    <h3>Stripe</h3>
+                    <p>Late-stage fintech investment</p>
+                </div>
+                <div class="example-card" data-company="Databricks" data-context="Pre-IPO evaluation. Analyze data platform market and enterprise adoption.">
+                    <h3>Databricks</h3>
+                    <p>Pre-IPO data platform analysis</p>
+                </div>
+                <div class="example-card" data-company="Notion" data-context="Series C follow-on. Evaluate productivity software market and competitive threats.">
+                    <h3>Notion</h3>
+                    <p>Productivity software follow-on</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <h3>🎯 Use Cases</h3>
+            <ul>
+                <li><strong>Venture Capital:</strong> Evaluate startup investment opportunities</li>
+                <li><strong>Private Equity:</strong> Assess acquisition targets</li>
+                <li><strong>Corporate Development:</strong> Research M&A prospects</li>
+                <li><strong>Strategic Planning:</strong> Analyze competitors and market dynamics</li>
+            </ul>
+
+            <div class="disclaimer">
+                <h3>⚠️ Disclaimer</h3>
+                <p>This AI-powered analysis is for informational purposes only. Always conduct additional due diligence and consult with legal, financial, and industry experts before making investment decisions.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
