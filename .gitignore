@@ -46,3 +46,6 @@ Thumbs.db
 
 # uv
 uv.lock
+
+# Personal notes (local only)
+guide de lecture détaillé.md
