@@ -1,0 +1,87 @@
+# ============================================================================
+# DEPLOYMENT - Frontend Nginx
+# ============================================================================
+# Déploie le frontend Nginx avec:
+# - 2 replicas pour haute disponibilité
+# - Healthchecks
+# - Limites de ressources
+# ============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: investment-ai
+  labels:
+    app: investment-due-diligence
+    component: frontend
+spec:
+  # Nombre de pods (instances) du frontend
+  replicas: 2
+  
+  # Stratégie de mise à jour
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  
+  # Sélecteur pour identifier les pods
+  selector:
+    matchLabels:
+      app: investment-due-diligence
+      component: frontend
+  
+  # Template du pod
+  template:
+    metadata:
+      labels:
+        app: investment-due-diligence
+        component: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: investment-frontend:latest
+        imagePullPolicy: IfNotPresent
+        
+        # Port exposé par Nginx
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        
+        # Variables d'environnement depuis ConfigMap
+        envFrom:
+        - configMapRef:
+            name: investment-ai-config
+        
+        # Limites de ressources (frontend plus léger)
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        
+        # Liveness Probe
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        # Readiness Probe
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+      
+      restartPolicy: Always

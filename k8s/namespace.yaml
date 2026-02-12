@@ -1,0 +1,14 @@
+# ============================================================================
+# NAMESPACE - Investment Due Diligence AI
+# ============================================================================
+# Un namespace isole les ressources de cette application
+# Facilite la gestion et la suppression complète de l'app
+# ============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: investment-ai
+  labels:
+    app: investment-due-diligence
+    environment: production

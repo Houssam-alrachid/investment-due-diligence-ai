@@ -1,0 +1,34 @@
+# ============================================================================
+# SERVICE - Backend (ClusterIP)
+# ============================================================================
+# Service interne pour le backend
+# Type ClusterIP: accessible uniquement depuis l'intérieur du cluster
+# Le frontend communique avec le backend via ce service
+# ============================================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: investment-ai
+  labels:
+    app: investment-due-diligence
+    component: backend
+spec:
+  # Type de service: ClusterIP (interne au cluster)
+  type: ClusterIP
+  
+  # Sélecteur: route le trafic vers les pods avec ces labels
+  selector:
+    app: investment-due-diligence
+    component: backend
+  
+  # Ports exposés
+  ports:
+  - name: http
+    port: 8080        # Port du service
+    targetPort: 8080  # Port du conteneur
+    protocol: TCP
+  
+  # Session affinity: None (load balancing round-robin)
+  sessionAffinity: None

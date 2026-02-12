@@ -1,0 +1,106 @@
+# ============================================================================
+# DEPLOYMENT - Backend FastAPI
+# ============================================================================
+# Déploie le backend FastAPI avec:
+# - 2 replicas pour haute disponibilité
+# - Healthchecks (liveness + readiness)
+# - Limites de ressources
+# - Variables d'environnement depuis ConfigMap et Secrets
+# ============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: investment-ai
+  labels:
+    app: investment-due-diligence
+    component: backend
+spec:
+  # Nombre de pods (instances) du backend
+  replicas: 2
+  
+  # Stratégie de mise à jour: rolling update
+  # Met à jour progressivement sans downtime
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # 1 pod supplémentaire pendant la mise à jour
+      maxUnavailable: 0  # Aucun pod ne peut être indisponible
+  
+  # Sélecteur pour identifier les pods gérés par ce Deployment
+  selector:
+    matchLabels:
+      app: investment-due-diligence
+      component: backend
+  
+  # Template du pod
+  template:
+    metadata:
+      labels:
+        app: investment-due-diligence
+        component: backend
+    spec:
+      # Conteneur principal
+      containers:
+      - name: backend
+        image: investment-backend:latest
+        imagePullPolicy: IfNotPresent  # Utilise l'image locale si disponible
+        
+        # Port exposé par le conteneur
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        
+        # Variables d'environnement depuis ConfigMap
+        envFrom:
+        - configMapRef:
+            name: investment-ai-config
+        
+        # Variables d'environnement depuis Secrets
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: investment-ai-secrets
+              key: OPENAI_API_KEY
+        - name: SENDGRID_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: investment-ai-secrets
+              key: SENDGRID_API_KEY
+        
+        # Limites de ressources
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        
+        # Liveness Probe: Vérifie si le conteneur est vivant
+        # Si échoue, Kubernetes redémarre le pod
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        # Readiness Probe: Vérifie si le conteneur est prêt à recevoir du trafic
+        # Si échoue, le pod est retiré du Service
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      
+      # Redémarre toujours les pods en cas d'échec
+      restartPolicy: Always

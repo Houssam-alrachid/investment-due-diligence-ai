@@ -1,0 +1,26 @@
+# ============================================================================
+# CONFIGMAP - Configuration de l'Application
+# ============================================================================
+# Stocke les variables de configuration non-sensibles
+# Peut être modifié sans rebuild des images Docker
+# ============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: investment-ai-config
+  namespace: investment-ai
+  labels:
+    app: investment-due-diligence
+data:
+  # Configuration Backend
+  API_HOST: "0.0.0.0"
+  API_PORT: "8080"
+  PYTHONUNBUFFERED: "1"
+  
+  # Configuration Frontend
+  BACKEND_URL: "http://backend-service:8080"
+  
+  # Configuration Générale
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "info"

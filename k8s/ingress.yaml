@@ -1,0 +1,78 @@
+# ============================================================================
+# INGRESS - Routage HTTP/HTTPS
+# ============================================================================
+# Ingress pour router le trafic HTTP vers les services
+# Permet d'avoir un seul point d'entrée avec routing basé sur le path
+# 
+# IMPORTANT: Nécessite un Ingress Controller (nginx-ingress)
+# Sur Minikube: minikube addons enable ingress
+# ============================================================================
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: investment-ai-ingress
+  namespace: investment-ai
+  labels:
+    app: investment-due-diligence
+  annotations:
+    # Redirige HTTP vers HTTPS (optionnel, pour production)
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    
+    # Taille max des requêtes (pour upload de fichiers)
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    
+    # Timeout pour les requêtes longues (analyses AI)
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+spec:
+  # Utilise nginx comme ingress controller
+  ingressClassName: nginx
+  # Règles de routage
+  rules:
+  # Pour Minikube, on utilise l'IP du cluster
+  # En production, remplacer par votre domaine (ex: investment-ai.example.com)
+  - host: investment-ai.local
+    http:
+      paths:
+      # Route /api/* vers le backend
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 8080
+      
+      # Route /health (backend) pour healthchecks
+      - path: /health
+        pathType: Exact
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 8080
+      
+      # Route /docs (backend API documentation)
+      - path: /docs
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 8080
+      
+      # Route / (root) vers le frontend
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+  
+  # Configuration TLS/SSL (optionnel, pour production)
+  # tls:
+  # - hosts:
+  #   - investment-ai.example.com
+  #   secretName: investment-ai-tls-cert
