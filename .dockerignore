@@ -1,0 +1,171 @@
+# ============================================================================
+# .dockerignore - Investment Due Diligence AI
+# ============================================================================
+# Ce fichier indique à Docker quels fichiers/dossiers IGNORER lors du build
+# Similaire à .gitignore mais pour Docker
+# 
+# Pourquoi c'est important?
+# 1. Réduit la taille du contexte de build (plus rapide)
+# 2. Évite de copier des fichiers inutiles dans l'image
+# 3. Améliore la sécurité (pas de secrets accidentels)
+# 4. Optimise le cache Docker
+# ============================================================================
+
+# ============================================================================
+# FICHIERS DE CONTRÔLE DE VERSION
+# ============================================================================
+# Git n'a pas besoin d'être dans le conteneur
+.git
+.gitignore
+.gitattributes
+
+# ============================================================================
+# ENVIRONNEMENTS VIRTUELS PYTHON
+# ============================================================================
+# Ne JAMAIS copier l'environnement virtuel dans Docker
+# Pourquoi? Docker crée son propre environnement isolé
+# Copier .venv serait redondant et causerait des conflits
+.venv/
+venv/
+ENV/
+env/
+.Python
+
+# ============================================================================
+# FICHIERS PYTHON COMPILÉS
+# ============================================================================
+# Ces fichiers sont générés automatiquement par Python
+# Ils seront recréés dans le conteneur
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+*.whl
+
+# ============================================================================
+# FICHIERS DE CONFIGURATION IDE
+# ============================================================================
+# Spécifiques à votre éditeur, inutiles dans le conteneur
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ============================================================================
+# VARIABLES D'ENVIRONNEMENT ET SECRETS
+# ============================================================================
+# CRITIQUE: Ne JAMAIS inclure les fichiers .env dans l'image Docker
+# Les secrets doivent être passés au runtime via:
+# - Variables d'environnement (-e flag)
+# - Docker secrets
+# - Kubernetes secrets
+.env
+.env.*
+*.env
+
+# ============================================================================
+# FICHIERS DE LOCK ET CACHE
+# ============================================================================
+# uv.lock est spécifique à votre machine locale
+# Le conteneur utilisera requirements.txt
+uv.lock
+*.lock
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ============================================================================
+# LOGS ET FICHIERS TEMPORAIRES
+# ============================================================================
+*.log
+*.tmp
+*.temp
+*.cache
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ============================================================================
+# DOCUMENTATION ET NOTES
+# ============================================================================
+# Fichiers de documentation non nécessaires dans le conteneur
+*.md
+!README.md
+docs/
+Docs/
+guide*.md
+
+# ============================================================================
+# FICHIERS DOCKER
+# ============================================================================
+# Pas besoin des Dockerfiles dans l'image finale
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# ============================================================================
+# FICHIERS DE TEST
+# ============================================================================
+# Les tests ne sont pas nécessaires en production
+tests/
+test_*.py
+*_test.py
+.pytest_cache/
+
+# ============================================================================
+# FICHIERS DE DÉPLOIEMENT
+# ============================================================================
+# Configurations Kubernetes, scripts de déploiement, etc.
+k8s/
+kubernetes/
+*.yaml
+*.yml
+!requirements.txt
+
+# ============================================================================
+# FICHIERS SPÉCIFIQUES AU PROJET
+# ============================================================================
+# Ajoutez ici les fichiers spécifiques à votre projet
+
+# Scripts de démarrage locaux (pas pour production)
+start.bat
+start.sh
+
+# Fichiers de configuration locaux
+pyproject.toml
+
+# ============================================================================
+# NOTES IMPORTANTES
+# ============================================================================
+#
+# 1. ORDRE D'ÉVALUATION:
+#    Docker lit .dockerignore de haut en bas
+#    Les règles plus spécifiques doivent venir après les générales
+#
+# 2. PATTERNS:
+#    - *.log : Tous les fichiers .log
+#    - **/*.log : Tous les .log dans tous les sous-dossiers
+#    - !file.txt : Exception (ne pas ignorer ce fichier)
+#
+# 3. VÉRIFICATION:
+#    Pour voir ce qui sera copié dans le contexte Docker:
+#    docker build --no-cache --progress=plain -t test . 2>&1 | grep "COPY"
+#
+# 4. TAILLE DU CONTEXTE:
+#    Sans .dockerignore: ~500MB (avec .venv, __pycache__, etc.)
+#    Avec .dockerignore: ~5MB (seulement le code source)
+#    Gain: 99% de réduction!
+#
+# 5. SÉCURITÉ:
+#    Toujours vérifier qu'aucun secret n'est copié:
+#    docker history investment-backend:latest
+#
+# ============================================================================

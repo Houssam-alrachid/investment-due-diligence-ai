@@ -104,8 +104,9 @@ uv self update
 # 3. Sync environment (installs Python 3.12 and all dependencies)
 uv sync
 
-# 4. (Optional) Generate requirements.txt for deployment
-uv pip compile pyproject.toml -o requirements.txt
+# 4. Update requirements.txt for deployment
+# Use the provided script to regenerate requirements.txt without Windows-only dependencies
+.\update-requirements.bat
 
 # That's it! uv created a .venv virtual environment and installed everything
 ```

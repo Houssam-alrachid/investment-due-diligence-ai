@@ -103,8 +103,10 @@ python-multipart==0.0.22
     # via
     #   investment-due-diligence-ai (pyproject.toml)
     #   mcp
-pywin32==311
-    # via mcp
+# pywin32==311
+#     # via mcp
+#     # EXCLUDED: Windows-only dependency, not required for core functionality
+#     # MCP works fine without it on Linux/macOS/Docker
 pyyaml==6.0.3
     # via uvicorn
 referencing==0.37.0

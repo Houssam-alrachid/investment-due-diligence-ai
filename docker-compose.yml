@@ -1,0 +1,309 @@
+# ============================================================================
+# DOCKER COMPOSE - Investment Due Diligence AI
+# ============================================================================
+# Docker Compose permet d'orchestrer plusieurs conteneurs ensemble
+# C'est parfait pour le développement local et les tests
+# 
+# Avantages de Docker Compose:
+# 1. Définir toute l'architecture dans un seul fichier
+# 2. Démarrer tous les services avec une seule commande
+# 3. Networking automatique entre conteneurs
+# 4. Gestion des volumes et variables d'environnement
+# 5. Facile à partager avec l'équipe
+# ============================================================================
+
+# Version du format Docker Compose
+# Version 3.8 est stable et largement supportée
+version: '3.8'
+
+# ============================================================================
+# SERVICES
+# ============================================================================
+# Chaque service = un conteneur
+# Ici on a 2 services: backend et frontend
+
+services:
+  # ==========================================================================
+  # SERVICE BACKEND (FastAPI)
+  # ==========================================================================
+  backend:
+    # Nom du conteneur (optionnel mais recommandé pour clarté)
+    container_name: investment-backend
+    
+    # Build configuration
+    build:
+      # Contexte de build: répertoire racine du projet
+      # Docker Compose cherchera le Dockerfile à partir d'ici
+      context: .
+      
+      # Chemin vers le Dockerfile
+      # Relatif au contexte (donc ./backend/Dockerfile)
+      dockerfile: backend/Dockerfile
+      
+      # Arguments de build (optionnel)
+      # Permet de passer des variables au moment du build
+      # args:
+      #   PYTHON_VERSION: 3.12
+    
+    # Nom de l'image créée
+    # Format: nom:tag
+    image: investment-backend:latest
+    
+    # Politique de redémarrage
+    # unless-stopped: Redémarre toujours sauf si arrêté manuellement
+    # Autres options: no, always, on-failure
+    restart: unless-stopped
+    
+    # Mapping des ports
+    # Format: "PORT_HOTE:PORT_CONTENEUR"
+    # Ici: localhost:8080 → conteneur:8080
+    ports:
+      - "8080:8080"
+    
+    # Variables d'environnement
+    # IMPORTANT: Pour la production, utilisez un fichier .env
+    environment:
+      # API Keys (À REMPLACER par vos vraies clés)
+      # En production, utilisez Docker secrets ou Kubernetes secrets
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      
+      # Configuration de l'application
+      - API_HOST=0.0.0.0
+      - API_PORT=8080
+      - PYTHONUNBUFFERED=1
+      
+      # URL du frontend pour CORS
+      # Permet au backend d'accepter les requêtes du frontend
+      - FRONTEND_URL=http://localhost:3000
+    
+    # Fichier .env (optionnel mais recommandé)
+    # Docker Compose chargera automatiquement les variables depuis .env
+    env_file:
+      - .env
+    
+    # Volumes (optionnel pour développement)
+    # Permet de monter le code local dans le conteneur
+    # Utile pour le hot-reload pendant le développement
+    # volumes:
+    #   - ./backend:/app
+    
+    # Healthcheck
+    # Vérifie que le service est en bonne santé
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Réseaux
+    # Connecte ce service au réseau 'app-network'
+    networks:
+      - app-network
+    
+    # Dépendances (optionnel)
+    # Si vous aviez une base de données, vous mettriez:
+    # depends_on:
+    #   - database
+    
+    # Limites de ressources (optionnel mais recommandé pour production)
+    # Empêche un conteneur de consommer toutes les ressources
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'      # Maximum 1 CPU
+          memory: 1G       # Maximum 1GB RAM
+        reservations:
+          cpus: '0.5'      # Minimum 0.5 CPU
+          memory: 512M     # Minimum 512MB RAM
+
+  # ==========================================================================
+  # SERVICE FRONTEND (Nginx)
+  # ==========================================================================
+  frontend:
+    # Nom du conteneur
+    container_name: investment-frontend
+    
+    # Build configuration
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    
+    # Nom de l'image
+    image: investment-frontend:latest
+    
+    # Politique de redémarrage
+    restart: unless-stopped
+    
+    # Mapping des ports
+    # localhost:3000 → conteneur:80 (Nginx écoute sur 80)
+    ports:
+      - "3000:80"
+    
+    # Variables d'environnement (si nécessaire)
+    # Pour un frontend statique, généralement pas besoin
+    # Mais on peut configurer l'URL du backend
+    environment:
+      - BACKEND_URL=http://localhost:8080
+    
+    # Dépendances
+    # Le frontend dépend du backend
+    # Docker Compose démarrera le backend avant le frontend
+    depends_on:
+      backend:
+        # Condition: Attendre que le backend soit "healthy"
+        # Nécessite que le backend ait un healthcheck configuré
+        condition: service_healthy
+    
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    
+    # Réseaux
+    networks:
+      - app-network
+    
+    # Limites de ressources
+    # Le frontend statique nécessite moins de ressources
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+# ============================================================================
+# RÉSEAUX
+# ============================================================================
+# Définition des réseaux personnalisés
+# Docker Compose crée automatiquement un réseau par défaut,
+# mais on peut en créer des personnalisés pour plus de contrôle
+
+networks:
+  app-network:
+    # Driver bridge: Réseau isolé sur l'hôte
+    # Les conteneurs peuvent communiquer entre eux via leurs noms
+    driver: bridge
+    
+    # Configuration du réseau (optionnel)
+    ipam:
+      driver: default
+      config:
+        # Sous-réseau personnalisé
+        - subnet: 172.28.0.0/16
+
+# ============================================================================
+# VOLUMES (Optionnel)
+# ============================================================================
+# Volumes persistants pour les données
+# Utile si vous avez une base de données ou besoin de persister des données
+
+# volumes:
+#   postgres-data:
+#     driver: local
+#   redis-data:
+#     driver: local
+
+# ============================================================================
+# COMMANDES DOCKER COMPOSE
+# ============================================================================
+#
+# 1. DÉMARRER TOUS LES SERVICES:
+#    docker-compose up
+#    
+#    Options utiles:
+#    -d : Mode détaché (en arrière-plan)
+#    --build : Forcer le rebuild des images
+#    --force-recreate : Recréer les conteneurs même s'ils existent
+#
+#    Exemple:
+#    docker-compose up -d --build
+#
+# 2. ARRÊTER TOUS LES SERVICES:
+#    docker-compose down
+#    
+#    Options:
+#    -v : Supprimer aussi les volumes
+#    --rmi all : Supprimer aussi les images
+#
+# 3. VOIR LES LOGS:
+#    docker-compose logs
+#    
+#    Options:
+#    -f : Suivre les logs en temps réel (follow)
+#    backend : Logs d'un service spécifique
+#    
+#    Exemple:
+#    docker-compose logs -f backend
+#
+# 4. LISTER LES SERVICES:
+#    docker-compose ps
+#
+# 5. EXÉCUTER UNE COMMANDE DANS UN CONTENEUR:
+#    docker-compose exec backend bash
+#    docker-compose exec backend python -c "print('Hello')"
+#
+# 6. REBUILD UN SERVICE SPÉCIFIQUE:
+#    docker-compose build backend
+#
+# 7. REDÉMARRER UN SERVICE:
+#    docker-compose restart backend
+#
+# 8. VOIR L'UTILISATION DES RESSOURCES:
+#    docker-compose stats
+#
+# ============================================================================
+# WORKFLOW DE DÉVELOPPEMENT
+# ============================================================================
+#
+# 1. Première fois:
+#    docker-compose up --build
+#
+# 2. Modifications du code:
+#    - Si code Python: docker-compose restart backend
+#    - Si Dockerfile: docker-compose up --build backend
+#    - Si HTML/CSS/JS: docker-compose restart frontend
+#
+# 3. Voir les logs:
+#    docker-compose logs -f
+#
+# 4. Arrêter:
+#    docker-compose down
+#
+# 5. Nettoyer tout (images, conteneurs, volumes):
+#    docker-compose down -v --rmi all
+#
+# ============================================================================
+# VARIABLES D'ENVIRONNEMENT
+# ============================================================================
+#
+# Créez un fichier .env à la racine du projet:
+#
+# OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxx
+# SENDGRID_API_KEY=SG.xxxxxxxxxxxxx
+#
+# Docker Compose chargera automatiquement ces variables
+#
+# ============================================================================
+# PRODUCTION VS DÉVELOPPEMENT
+# ============================================================================
+#
+# Pour la production, créez docker-compose.prod.yml:
+#
+# docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Différences production:
+# - Pas de volumes montés (code dans l'image)
+# - Limites de ressources strictes
+# - Logging vers fichiers
+# - Healthchecks plus fréquents
+# - Secrets via Docker secrets ou vault
+#
+# ============================================================================
