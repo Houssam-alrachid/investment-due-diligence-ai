@@ -106,7 +106,7 @@ uv sync
 
 # 4. Update requirements.txt for deployment
 # Use the provided script to regenerate requirements.txt without Windows-only dependencies
-.\update-requirements.bat
+.\scripts\update-requirements.bat
 
 # That's it! uv created a .venv virtual environment and installed everything
 ```
@@ -116,7 +116,7 @@ uv sync
 ### Option 1: Automatic Start (Windows)
 
 ```bash
-.\start.bat
+.\scripts\start.bat
 ```
 
 This automatically launches both backend and frontend in separate windows.
@@ -294,7 +294,7 @@ This project supports multiple deployment strategies to fit different needs and 
 
 **Quick Start with Batch Scripts (Windows):**
 ```bash
-.\start.bat
+.\scripts\start.bat
 ```
 This automatically launches both backend (port 8080) and frontend (port 3000) in separate windows.
 
@@ -315,7 +315,7 @@ python -m http.server 3000
 
 **Build and run:**
 ```bash
-.\docker-build.bat
+.\scripts\docker-build.bat
 docker-compose up -d
 ```
 
@@ -325,7 +325,7 @@ docker-compose up -d
 
 **Automated Deployment:**
 ```bash
-.\deploy-cloud-run.bat
+.\scripts\deploy-cloud-run.bat
 ```
 
 **Why Cloud Run?**
