@@ -286,23 +286,63 @@ Final Report Display
 - **Responsive** : Fonctionne sur mobile et desktop
 - **SSE** : Mises à jour en temps réel sans polling
 
-## 🚀 Déploiement
+## 🚀 Deployment Options
 
-### Backend
+This project supports multiple deployment strategies to fit different needs and scales.
+
+### **Option 1: Local Development (Recommended for Testing)**
+
+**Quick Start with Batch Scripts (Windows):**
 ```bash
-# Avec Docker
-docker build -t due-diligence-api ./backend
-docker run -p 8000:8000 due-diligence-api
+.\start.bat
+```
+This automatically launches both backend (port 8080) and frontend (port 3000) in separate windows.
 
-# Avec Gunicorn
-gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
+**Manual Start:**
+```bash
+# Terminal 1 - Backend
+cd backend
+uv run run.py
+
+# Terminal 2 - Frontend
+cd frontend
+python -m http.server 3000
 ```
 
-### Frontend
+---
+
+### **Option 2: Docker Compose (Local Production-like)**
+
+**Build and run:**
 ```bash
-# Servir avec nginx, Apache, ou n'importe quel serveur web
-# Ou utiliser un CDN comme Netlify, Vercel
+.\docker-build.bat
+docker-compose up -d
 ```
+
+---
+
+### **Option 3: Google Cloud Run (Production) ✅**
+
+**Automated Deployment:**
+```bash
+.\deploy-cloud-run.bat
+```
+
+**Why Cloud Run?**
+- Serverless, auto-scaling, 1-10€/month
+- HTTPS included, production-ready
+- See `0 Docs/Deploiement/10-Cloud-Run-Deployment.md`
+
+---
+
+### **Option 4: Kubernetes**
+
+```bash
+kubectl apply -f k8s/
+```
+See `0 Docs/Deploiement/08-Kubernetes-Deployment.md`
+
+---
 
 ## 📈 Améliorations Futures
 
@@ -318,8 +358,8 @@ gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
 ## 🔗 Documentation API
 
 Une fois le backend lancé, accédez à :
-- **Swagger UI** : `http://localhost:8000/docs`
-- **ReDoc** : `http://localhost:8000/redoc`
+- **Swagger UI** : `http://localhost:8080/docs`
+- **ReDoc** : `http://localhost:8080/redoc`
 
 ## 🔧 Advanced Configuration
 
