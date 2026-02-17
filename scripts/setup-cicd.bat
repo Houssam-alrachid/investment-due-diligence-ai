@@ -1,6 +1,10 @@
 @echo off
 REM Setup CI/CD Pipeline for Cloud Run
 REM This script configures Cloud Build triggers and permissions
+REM 
+REM USAGE: Run this script from the repository root directory:
+REM   cd c:\Users\houssam.alrachid\Desktop\investment_due_diligence_ai
+REM   scripts\setup-cicd.bat
 
 echo ========================================
 echo Setting up CI/CD Pipeline
@@ -90,6 +94,8 @@ gcloud builds triggers create github ^
     --branch-pattern="^main$" ^
     --build-config=cloudbuild-secure.yaml ^
     --substitutions=_REGION=%REGION%
+
+REM Note: cloudbuild-secure.yaml should be in the repository root
 
 echo.
 echo ========================================
