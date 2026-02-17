@@ -49,3 +49,6 @@ uv.lock
 
 # Personal notes (local only)
 0 Docs/
+
+# GitHub workflows (optional - using Cloud Build instead)
+.github/
